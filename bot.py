@@ -9,7 +9,7 @@ from telegram.ext import (
     filters
 )
 
-Token = os.getenv("Token")
+TOKEN = os.getenv("TOKEN")
 
 PRIVATE_LINK = "https://t.me/+e4D7AQ8qlhk5MGY5"
 
@@ -22,12 +22,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("💳 Банковская карта", callback_data="card")]
     ]
 
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
     await update.message.reply_text(
         "👋 Всем привет!\n\n"
         "Если хочешь купить мою приватку — выбери способ оплаты 👇",
-        reply_markup=reply_markup
+        reply_markup=InlineKeyboardMarkup(keyboard)
     )
 
 
@@ -36,7 +34,6 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
-    # ⭐ Stars оплата
     if query.data == "stars":
 
         await context.bot.send_invoice(
@@ -44,19 +41,16 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
             title="Приватка",
             description="Доступ к приватке",
             payload="privat_stars_100",
-            provider_token="",   # важно для Stars
+            provider_token="",
             currency="XTR",
             prices=[LabeledPrice("Доступ", 100)]
         )
 
-    # 💳 заглушка карты
     elif query.data == "card":
-        await query.edit_message_text(
-            "💳 Оплата картой\n\n⏳ Скоро будет доступно"
-        )
+        await query.edit_message_text("💳 Оплата картой\n\n⏳ Скоро будет доступно")
 
 
-# обязательное подтверждение оплаты
+# обязательный precheckout
 async def precheckout(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.pre_checkout_query.answer(ok=True)
 
@@ -66,7 +60,7 @@ async def successful_payment(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
     await update.message.reply_text(
         "✅ Оплата прошла успешно!\n\n"
-        f"Вот твоя ссылка на приват:\n{PRIVATE_LINK}"
+        f"Вот твоя ссылка:\n{PRIVATE_LINK}"
     )
 
 
@@ -75,6 +69,6 @@ app = ApplicationBuilder().token(TOKEN).build()
 app.add_handler(CommandHandler("start", start))
 app.add_handler(CallbackQueryHandler(buttons))
 app.add_handler(MessageHandler(filters.SUCCESSFUL_PAYMENT, successful_payment))
-app.add_handler(CallbackQueryHandler(precheckout, pattern="pre_checkout_query"))
+app.add_handler(MessageHandler(filters.PRE_CHECKOUT_QUERY, precheckout))
 
 app.run_polling()
