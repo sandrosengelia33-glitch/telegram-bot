@@ -9,7 +9,12 @@ from telegram.ext import (
     filters
 )
 
-TOKEN = os.getenv("TOKEN")
+import os
+
+TOKEN = os.environ.get("TOKEN")
+
+if not TOKEN:
+    raise Exception("TOKEN is NOT loaded from Railway Variables")
 
 PRIVATE_LINK = "https://t.me/+e4D7AQ8qlhk5MGY5"
 
