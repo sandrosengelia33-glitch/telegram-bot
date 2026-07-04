@@ -11,7 +11,7 @@ from telegram.ext import (
 
 import os
 
-TOKEN = os.environ.get("TOKEN")
+TOKEN= os.environ.get("TOKEN")
 
 if not TOKEN:
     raise Exception("TOKEN is NOT loaded from Railway Variables")
